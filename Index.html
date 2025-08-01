@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Página de Pagamento</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 15px;
+    }
+
+    .payment-container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      max-width: 450px;
+      width: 100%;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    .payment-methods {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+
+    .payment-methods label {
+      flex: 1;
+      background-color: #f9f9f9;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: border 0.3s;
+    }
+
+    .payment-methods input[type="radio"] {
+      display: none;
+    }
+
+    .payment-methods input[type="radio"]:checked + label {
+      border-color: #4CAF50;
+      background-color: #e8f5e9;
+    }
+
+    label {
+      font-size: 14px;
+      color: #444;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus {
+      border-color: #4CAF50;
+      outline: none;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .card-number-wrapper {
+      position: relative;
+    }
+
+    .card-flag {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 20px;
+      width: 30px;
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    /* Ocultação das áreas por padrão */
+    #paypal-area, #pagseguro-area {
+      display: none;
+      text-align: center;
+      padding-top: 15px;
+    }
+
+    #paypal-area button,
+    #pagseguro-area button {
+      background-color: #0070ba;
+      margin-top: 10px;
+    }
+
+    #pagseguro-area button {
+      background-color: #f29100;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="payment-container">
+    <h2>Finalizar Pagamento</h2>
+
+    <div class="payment-methods">
+      <input type="radio" name="payment_method" id="card" value="card" checked>
+      <label for="card">Cartão</label>
+
+      <input type="radio" name="payment_method" id="paypal" value="paypal">
+      <label for="paypal">PayPal</label>
+
+      <input type="radio" name="payment_method" id="pagseguro" value="pagseguro">
+      <label for="pagseguro">PagSeguro</label>
+    </div>
+
+    <!-- Formulário de Cartão -->
+    <form id="card-form">
+      <label for="card-name">Nome no Cartão</label>
+      <input type="text" id="card-name" name="card_name" placeholder="Nome completo" required>
+
+      <label for="card-number">Número do Cartão</label>
+      <div class="card-number-wrapper">
+        <input type="text" id="card-number" name="card_number" maxlength="19" placeholder="0000 0000 0000 0000" required>
+        <span class="card-flag" id="card-flag"></span>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="card-expiry">Validade</label>
+          <input type="text" id="card-expiry" name="card_expiry" maxlength="5" placeholder="MM/AA" required>
+        </div>
+        <div>
+          <label for="card-cvv">CVV</label>
+          <input type="text" id="card-cvv" name="card_cvv" maxlength="4" placeholder="123" required>
+        </div>
+      </div>
+
+      <label for="installments">Parcelamento</label>
+      <select id="installments" name="installments">
+        <option value="1">1x sem juros</option>
+        <option value="2">2x sem juros</option>
+        <option value="3">3x sem juros</option>
+        <option value="4">4x com juros</option>
+        <option value="5">5x com juros</option>
+      </select>
+
+      <button type="submit" id="pay-button">Confirmar Pagamento</button>
+    </form>
+
+    <!-- Área PayPal -->
+    <div id="paypal-area">
+      <p>Você será redirecionado ao site do PayPal para concluir o pagamento.</p>
+      <button id="paypal-button">Pagar com PayPal</button>
+    </div>
+
+    <!-- Área PagSeguro -->
+    <div id="pagseguro-area">
+      <p>Você será redirecionado ao PagSeguro para concluir o pagamento.</p>
+      <button id="pagseguro-button">Pagar com PagSeguro</button>
+    </div>
+  </div>
+
+  <!-- Script opcional para trocar telas futuramente -->
+  <script>
+    const radios = document.querySelectorAll('input[name="payment_method"]');
+    const cardForm = document.getElementById('card-form');
+    const paypalArea = document.getElementById('paypal-area');
+    const pagseguroArea = document.getElementById('pagseguro-area');
+
+    radios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.value === 'card') {
+          cardForm.style.display = 'block';
+          paypalArea.style.display = 'none';
+          pagseguroArea.style.display = 'none';
+        } else if (radio.value === 'paypal') {
+          cardForm.style.display = 'none';
+          paypalArea.style.display = 'block';
+          pagseguroArea.style.display = 'none';
+        } else if (radio.value === 'pagseguro') {
+          cardForm.style.display = 'none';
+          paypalArea.style.display = 'none';
+          pagseguroArea.style.display = 'block';
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
